@@ -12,7 +12,7 @@ YELLOW='\033[1;33m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
-# Menampilkan
+# Menampilkan logo dengan animasi sederhana
 show_logo() {
     echo -e "${LIGHT_GREEN}"
     echo " Buy me a coffee : 0x3d7b9825b152d24cc9bcc7cbb4dd20018db97ea5 "
@@ -21,13 +21,25 @@ show_logo() {
     echo -e "${LIGHT_GREEN} Kaitou Oim Custom Installer${NC}"
     echo -e "${WHITE} Repo: https://github.com/kaitouoim ${NC}"
     echo -e "${YELLOW}=========================================${NC}"
+    sleep 1
+    echo -ne "${BLUE}Loading."
+    for i in {1..3}; do
+        echo -ne "."
+        sleep 0.5
+    done
+    echo -e "${NC}\n"
 }
 
 show_logo
 
-# Fungsi untuk mencetak status
+# Fungsi untuk mencetak status dengan animasi
 print_status() {
-    echo -e "${BLUE}>>> $1...${NC}"
+    echo -ne "${BLUE}>>> $1"
+    for i in {1..3}; do
+        echo -ne "."
+        sleep 0.5
+    done
+    echo -e "${NC}"
 }
 
 # Mengecek status perintah
@@ -71,20 +83,40 @@ install_custom() {
     echo "source ~/.cargo/env"
 }
 
-# Fungsi uninstalasi
+# Fungsi uninstalasi dengan konfirmasi
 uninstall_custom() {
-    print_status "Menghapus Rust dan dependensi"
-    rustup self uninstall -y
-    sudo apt remove --purge -y screen build-essential pkg-config libssl-dev git unzip
-    sudo apt autoremove -y
-    check_status "Rust dan dependensi dihapus"
-
-    print_status "Menghapus swapfile"
+    read -p "Apakah Anda yakin ingin menghapus Nexus? (y/n): " confirm
+    if [[ "$confirm" != "y" ]]; then
+        echo -e "${RED}Uninstall dibatalkan.${NC}"
+        return
+    fi
+    
+    print_status "Menghapus Nexus"
+    
+    # Hentikan session screen jika ada
+    screen -X -S nexus quit 2>/dev/null
+    
+    # Hapus swap file
     sudo swapoff /swapfile
     sudo rm -f /swapfile
     check_status "Swapfile dihapus"
-
-    print_status "Uninstall selesai!"
+    
+    # Hapus Rust dan cargo
+    rustup self uninstall -y
+    check_status "Rust dihapus"
+    
+    # Hapus protoc
+    sudo rm -rf /usr/local/bin/protoc
+    sudo rm -rf /usr/local/include/google
+    
+    # Hapus direktori Nexus
+    rm -rf ~/.nexus
+    
+    # Hapus file yang diunduh
+    rm -f protoc-21.3-linux-x86_64.zip
+    
+    check_status "Uninstallation"
+    echo -e "${GREEN}Nexus telah berhasil dihapus${NC}"
 }
 
 # Menu interaktif
