@@ -1,7 +1,4 @@
-# nexus-devnet install :
-
-![Kaitou Oim](https://github.com/kaitouoim/nexus-devnet/raw/main/logo.png) 
-
+# nexus-devnet install
 Jalankan perintah berikut di terminal:
 
 ```bash
