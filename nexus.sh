@@ -14,7 +14,6 @@ NC='\033[0m' # No Color
 
 # Menampilkan logo
 show_logo() {
-    curl -s https://raw.githubusercontent.com/bangpateng/logo/main/logo.sh | bash
     echo -e "${LIGHT_GREEN}"
     echo " Buy me a coffee : 0x3d7b9825b152d24cc9bcc7cbb4dd20018db97ea5 "
     echo -e "${NC}"
@@ -87,8 +86,8 @@ install_custom() {
     check_status "Nexus berhasil diinstal"
 
     print_status "Instalasi selesai!"
-    echo -e "${LIGHT_GREEN}Untuk mulai menggunakan Rust, jalankan perintah:${NC}"
-    echo "source ~/.cargo/env"
+    echo -e "${LIGHT_GREEN}Untuk mulai melanjutkan :${NC}"
+    echo "screen -r nexus"
 }
 
 # Fungsi uninstalasi dengan konfirmasi
