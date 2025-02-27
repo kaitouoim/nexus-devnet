@@ -71,12 +71,29 @@ install_custom() {
     echo "source ~/.cargo/env"
 }
 
+# Fungsi uninstalasi
+uninstall_custom() {
+    print_status "Menghapus Rust dan dependensi"
+    rustup self uninstall -y
+    sudo apt remove --purge -y screen build-essential pkg-config libssl-dev git unzip
+    sudo apt autoremove -y
+    check_status "Rust dan dependensi dihapus"
+
+    print_status "Menghapus swapfile"
+    sudo swapoff /swapfile
+    sudo rm -f /swapfile
+    check_status "Swapfile dihapus"
+
+    print_status "Uninstall selesai!"
+}
+
 # Menu interaktif
 while true; do
     echo -e "\n${YELLOW}Pilih tindakan:${NC}"
     echo -e "${LIGHT_BLUE}1) Mulai instalasi Kaitou Oim Installer${NC}"
-    echo -e "${RED}2) Keluar${NC}"
-    read -p "Masukkan pilihan (1-2): " choice
+    echo -e "${RED}2) Uninstall Kaitou Oim Installer${NC}"
+    echo -e "${RED}3) Keluar${NC}"
+    read -p "Masukkan pilihan (1-3): " choice
 
     case $choice in
         1)
@@ -84,6 +101,10 @@ while true; do
             break
             ;;
         2)
+            uninstall_custom
+            break
+            ;;
+        3)
             echo -e "${LIGHT_GREEN}Terima kasih, keluar...${NC}"
             exit 0
             ;;
