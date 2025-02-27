@@ -12,8 +12,9 @@ YELLOW='\033[1;33m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
-# Menampilkan logo dengan animasi sederhana
+# Menampilkan logo
 show_logo() {
+    curl -s https://raw.githubusercontent.com/bangpateng/logo/main/logo.sh | bash
     echo -e "${LIGHT_GREEN}"
     echo " Buy me a coffee : 0x3d7b9825b152d24cc9bcc7cbb4dd20018db97ea5 "
     echo -e "${NC}"
@@ -21,25 +22,13 @@ show_logo() {
     echo -e "${LIGHT_GREEN} Kaitou Oim Custom Installer${NC}"
     echo -e "${WHITE} Repo: https://github.com/kaitouoim ${NC}"
     echo -e "${YELLOW}=========================================${NC}"
-    sleep 1
-    echo -ne "${BLUE}Loading."
-    for i in {1..3}; do
-        echo -ne "."
-        sleep 0.5
-    done
-    echo -e "${NC}\n"
 }
 
 show_logo
 
-# Fungsi untuk mencetak status dengan animasi
+# Fungsi untuk mencetak status
 print_status() {
-    echo -ne "${BLUE}>>> $1"
-    for i in {1..3}; do
-        echo -ne "."
-        sleep 0.5
-    done
-    echo -e "${NC}"
+    echo -e "${BLUE}>>> $1...${NC}"
 }
 
 # Mengecek status perintah
@@ -59,7 +48,7 @@ install_custom() {
     check_status "Update sistem"
 
     print_status "Menginstal dependensi utama"
-    sudo apt install -y screen build-essential pkg-config libssl-dev git unzip
+    sudo apt install -y screen build-essential pkg-config libssl-dev git unzip protobuf-compiler
     check_status "Instalasi dependensi"
 
     print_status "Menginstal Rust untuk pengembangan"
@@ -70,6 +59,16 @@ install_custom() {
     source $HOME/.cargo/env
     check_status "Konfigurasi Rust"
 
+    print_status "Menambahkan target riscv32i"
+    rustup target add riscv32i-unknown-none-elf
+    check_status "Instalasi target RISC-V"
+
+    print_status "Menginstal Protoc v21.3"
+    wget https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-x86_64.zip
+    check_status "Download Protoc"
+    unzip protoc-21.3-linux-x86_64.zip -d /usr/local
+    check_status "Ekstrak Protoc"
+
     print_status "Menyiapkan swap 16GB untuk kinerja lebih optimal"
     sudo swapoff -a
     sudo fallocate -l 16G /swapfile
@@ -77,6 +76,15 @@ install_custom() {
     sudo mkswap /swapfile
     sudo swapon /swapfile
     check_status "Swap berhasil dibuat"
+
+    print_status "Mengonfigurasi overcommit memory"
+    sudo sysctl -w vm.overcommit_memory=1
+    echo 'vm.overcommit_memory=1' | sudo tee -a /etc/sysctl.conf
+    check_status "Konfigurasi overcommit memory"
+
+    print_status "Menginstal dan menjalankan Nexus"
+    screen -dmS nexus bash -c 'curl https://cli.nexus.xyz/ | sh'
+    check_status "Nexus berhasil diinstal"
 
     print_status "Instalasi selesai!"
     echo -e "${LIGHT_GREEN}Untuk mulai menggunakan Rust, jalankan perintah:${NC}"
